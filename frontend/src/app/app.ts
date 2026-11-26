@@ -14,6 +14,7 @@ import { EMPTY, Observable, catchError, exhaustMap, finalize, interval, tap } fr
 import { ClaimsApiService } from './claims-api.service';
 import {
   Claim,
+  ClaimStatus,
   ClaimsStaff,
   Claimant,
   CreateClaimRequest,
@@ -21,6 +22,14 @@ import {
   ManagerMetrics,
   UserRole,
 } from './claims.models';
+
+interface ClaimStatusNotification {
+  id: number;
+  claimId: number;
+  claimantId: number;
+  status: 'Approved' | 'Rejected';
+  decisionNotes: string | null;
+}
 
 @Component({
   imports: [CurrencyPipe, DatePipe, DecimalPipe, FormsModule],
@@ -39,6 +48,7 @@ export class App implements OnInit {
   readonly claimants = signal<Claimant[]>([]);
   readonly staff = signal<ClaimsStaff[]>([]);
   readonly claims = signal<Claim[]>([]);
+  readonly claimStatusNotifications = signal<ClaimStatusNotification[]>([]);
   readonly metrics = signal<ManagerMetrics | null>(null);
   readonly selectedClaimantId = signal<number | null>(null);
   readonly selectedStaffId = signal<number | null>(null);
@@ -67,7 +77,18 @@ export class App implements OnInit {
           (claim) => Number(claim.claimantId) === Number(claimantId),
         );
   });
+  readonly visibleClaimNotifications = computed(() => {
+    const claimantId = this.selectedClaimantId();
+    return claimantId === null
+      ? []
+      : this.claimStatusNotifications().filter(
+          (notification) =>
+            Number(notification.claimantId) === Number(claimantId),
+        );
+  });
 
+  private readonly previousClaimStatuses = new Map<number, ClaimStatus>();
+  private nextNotificationId = 1;
   draft: CreateClaimRequest = {
     claimantId: 0,
     claimType: '',
@@ -219,6 +240,12 @@ export class App implements OnInit {
     );
   }
 
+  dismissClaimNotification(notificationId: number): void {
+    this.claimStatusNotifications.update((notifications) =>
+      notifications.filter((notification) => notification.id !== notificationId),
+    );
+  }
+
   private loadLookups(): void {
     this.api.getLookups().pipe(
       finalize(() => this.lookupsLoading.set(false)),
@@ -238,12 +265,47 @@ export class App implements OnInit {
 
   private fetchClaims(): Observable<Claim[]> {
     return this.api.getClaims().pipe(
-      tap((claims) => this.claims.set(claims)),
+      tap((claims) => this.updateClaimsAndNotifications(claims)),
       catchError((error: unknown) => {
         this.showError(error);
         return EMPTY;
       }),
     );
+  }
+
+  private updateClaimsAndNotifications(claims: Claim[]): void {
+    const selectedClaimantId = this.selectedClaimantId();
+    const newNotifications: ClaimStatusNotification[] = [];
+
+    for (const claim of claims) {
+      const previousStatus = this.previousClaimStatuses.get(claim.id);
+      if (
+        previousStatus !== undefined &&
+        previousStatus !== claim.status &&
+        (claim.status === 'Approved' || claim.status === 'Rejected') &&
+        selectedClaimantId !== null &&
+        Number(claim.claimantId) === Number(selectedClaimantId)
+      ) {
+        newNotifications.push({
+          id: this.nextNotificationId++,
+          claimId: claim.id,
+          claimantId: claim.claimantId,
+          status: claim.status,
+          decisionNotes: claim.decisionNotes,
+        });
+      }
+
+      this.previousClaimStatuses.set(claim.id, claim.status);
+    }
+
+    if (newNotifications.length > 0) {
+      this.claimStatusNotifications.update((notifications) => [
+        ...newNotifications,
+        ...notifications,
+      ]);
+    }
+
+    this.claims.set(claims);
   }
 
   private fetchMetrics(): Observable<ManagerMetrics> {

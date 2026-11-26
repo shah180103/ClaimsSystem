@@ -29,3 +29,9 @@
 - **Asked AI:** To filter the Claimant view's claim history table so it only displays claims belonging to the currently selected policyholder.
 - **Accepted:** Filtered the list on the frontend by matching `claimantId` to the dropdown selection, keeping full cross-company visibility intact for Claims Staff and Managers.
 - **Overrode:** Kept the filtering in the frontend instead of creating a new backend endpoint (`GET /api/claims/claimant/{id}`), avoiding extra API routes and duplicate 5-second polling calls since the app already loads the active claims list.
+
+### Claimant Status Change Notifications
+- **Asked AI:** To alert policyholders in the Claimant view whenever one of their claims changes status to `Approved` or `Rejected`, including the staff's decision notes.
+- **Accepted:** Tracked previous claim statuses across Angular's 5-second refresh cycles and displayed a dismissible banner at the top of the Claimant page upon status transition.
+- **Overrode:** Handled status change detection directly in the frontend using the existing polling loop instead of adding SignalR websockets or email/Kafka notification workers, avoiding extra backend infrastructure while still giving instant user feedback.
+

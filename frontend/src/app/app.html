@@ -87,6 +87,42 @@
     }
 
     @if (role() === 'Claimant') {
+      @if (visibleClaimNotifications().length > 0) {
+        <section
+          class="claim-notification-stack"
+          aria-label="Claim status notifications"
+          aria-live="polite"
+        >
+          @for (notification of visibleClaimNotifications(); track notification.id) {
+            <div
+              class="claim-notification"
+              [class.approved-notification]="notification.status === 'Approved'"
+              [class.rejected-notification]="notification.status === 'Rejected'"
+              role="status"
+            >
+              <span class="claim-notification-icon" aria-hidden="true">
+                {{ notification.status === 'Approved' ? '✓' : '!' }}
+              </span>
+              <div class="claim-notification-copy">
+                <strong>Claim #{{ notification.claimId }} is now {{ notification.status }}</strong>
+                <p>
+                  <span>Decision notes</span>
+                  {{ notification.decisionNotes || 'No decision notes provided.' }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="claim-notification-dismiss"
+                [attr.aria-label]="'Dismiss notification for claim ' + notification.claimId"
+                (click)="dismissClaimNotification(notification.id)"
+              >
+                ×
+              </button>
+            </div>
+          }
+        </section>
+      }
+
       <section class="view-heading">
         <div>
           <div class="section-kicker">YOUR ACCOUNT</div>
