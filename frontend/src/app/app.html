@@ -1,0 +1,514 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Claimwise home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M16 3.5 27 8v7.4c0 6.1-4.3 10.9-11 13.1C9.3 26.3 5 21.5 5 15.4V8l11-4.5Z" />
+          <path d="m11.1 16.2 3.2 3.2 6.8-7" />
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>Claimwise</strong>
+        <span>Claims workspace</span>
+      </span>
+    </a>
+
+    <div class="topbar-meta">
+      <span class="system-status"><span></span> Claims operations</span>
+      <span class="topbar-divider"></span>
+      <span class="workspace-label">Northstar Insurance</span>
+      <span class="avatar" aria-label="Guest user">G</span>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <section class="page-intro">
+      <div>
+        <p class="eyebrow">CLAIMS CENTER <span>·</span> OPERATIONS</p>
+        <h1>Good work starts with a clear view.</h1>
+        <p class="intro-copy">
+          A calm place to submit, review, and keep every claim moving.
+        </p>
+      </div>
+      <div class="date-chip">
+        <span class="date-icon" aria-hidden="true">◷</span>
+        <span>{{ today | date: 'EEEE, MMMM d' }}</span>
+      </div>
+    </section>
+
+    <section class="role-panel" aria-label="Choose your workspace">
+      <div class="role-panel-copy">
+        <span class="role-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+            <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+          </svg>
+        </span>
+        <span>
+          <strong>Viewing as</strong>
+          <small>Switch workspace</small>
+        </span>
+      </div>
+      <div class="role-switcher" role="group" aria-label="Role switcher">
+        @for (item of roles; track item) {
+          <button
+            type="button"
+            class="role-option"
+            [class.active]="role() === item"
+            [attr.aria-pressed]="role() === item"
+            (click)="setRole(item)"
+          >
+            @if (item === 'Claimant') {
+              <span class="role-option-icon" aria-hidden="true">◉</span>
+            } @else if (item === 'Claims Staff') {
+              <span class="role-option-icon" aria-hidden="true">◈</span>
+            } @else {
+              <span class="role-option-icon" aria-hidden="true">▥</span>
+            }
+            {{ item }}
+          </button>
+        }
+      </div>
+    </section>
+
+    @if (errorMessage()) {
+      <div class="notice notice-error" role="alert">
+        <span class="notice-symbol">!</span>
+        <span>{{ errorMessage() }}</span>
+        <button type="button" class="notice-close" aria-label="Dismiss error" (click)="errorMessage.set('')">×</button>
+      </div>
+    }
+    @if (successMessage()) {
+      <div class="notice notice-success" role="status">
+        <span class="notice-symbol">✓</span>
+        <span>{{ successMessage() }}</span>
+        <button type="button" class="notice-close" aria-label="Dismiss message" (click)="successMessage.set('')">×</button>
+      </div>
+    }
+
+    @if (role() === 'Claimant') {
+      <section class="view-heading">
+        <div>
+          <div class="section-kicker">YOUR ACCOUNT</div>
+          <h2>Claims overview</h2>
+        </div>
+        <span class="live-label"><span></span> Live status</span>
+      </section>
+
+      <div class="claimant-layout">
+        <section class="surface submit-card">
+          <div class="card-heading">
+            <div class="heading-icon heading-icon-green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </div>
+            <div>
+              <h3>Start a new claim</h3>
+              <p>Tell us what happened and we’ll take it from here.</p>
+            </div>
+          </div>
+
+          @if (lookupsLoading()) {
+            <div class="inline-loading"><span class="spinner"></span> Loading account details…</div>
+          } @else if (claimants().length === 0) {
+            <div class="empty-state compact-empty">
+              <span class="empty-icon">⌕</span>
+              <strong>No claimant accounts found</strong>
+              <p>We couldn’t load the available claimant list.</p>
+            </div>
+          } @else {
+            <form class="claim-form" #claimForm="ngForm" (ngSubmit)="submitClaim()">
+              <label class="field">
+                <span>Claimant</span>
+                <select
+                  name="claimantId"
+                  [ngModel]="selectedClaimantId()"
+                  (ngModelChange)="selectedClaimantId.set(+$event); draft.claimantId = +$event"
+                  required
+                >
+                  @for (claimant of claimants(); track claimant.id) {
+                    <option [ngValue]="claimant.id">{{ claimant.fullName }} · {{ claimant.policyNumber }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Claim type</span>
+                <select name="claimType" [(ngModel)]="draft.claimType" required>
+                  <option value="" disabled>Select a claim type</option>
+                  @for (claimType of claimTypes; track claimType) {
+                    <option [value]="claimType">{{ claimType }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="field">
+                <span>What happened?</span>
+                <textarea
+                  name="description"
+                  [(ngModel)]="draft.description"
+                  placeholder="Share a few details about your claim…"
+                  rows="4"
+                  required
+                ></textarea>
+              </label>
+
+              <label class="field">
+                <span>Estimated claim amount</span>
+                <div class="amount-input">
+                  <span>$</span>
+                  <input
+                    type="number"
+                    name="claimAmount"
+                    [(ngModel)]="draft.claimAmount"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+              </label>
+
+              <button
+                class="button button-primary submit-button"
+                type="submit"
+                [disabled]="claimForm.invalid || submitting() || lookupsLoading()"
+              >
+                @if (submitting()) {
+                  <span class="spinner spinner-light"></span>
+                  Submitting…
+                } @else {
+                  Submit claim <span class="button-arrow">→</span>
+                }
+              </button>
+              <p class="form-footnote"><span>♧</span> Your information is handled securely.</p>
+            </form>
+          }
+        </section>
+
+        <section class="surface claims-card">
+          <div class="list-heading">
+            <div>
+              <div class="section-kicker">CLAIM HISTORY</div>
+              <h3>All claims <span class="count-pill">{{ claims().length }}</span></h3>
+            </div>
+            <button type="button" class="icon-button" aria-label="Refresh claims" (click)="refreshClaims()">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 7v5h-5M4 17v-5h5" />
+                <path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2" />
+              </svg>
+            </button>
+          </div>
+
+          @if (claimsLoading() && claims().length === 0) {
+            <div class="loading-state"><span class="spinner"></span> Loading claims…</div>
+          } @else if (claims().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">▤</span>
+              <strong>No claims yet</strong>
+              <p>Your submitted claims will appear here.</p>
+            </div>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Claim</th>
+                    <th>Type</th>
+                    <th>Submitted</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (claim of claims(); track claim.id) {
+                    <tr>
+                      <td>
+                        <span class="claim-reference">#{{ claim.id }}</span>
+                        <span class="claim-owner">{{ claim.claimant.fullName }}</span>
+                      </td>
+                      <td>{{ claim.claimType }}</td>
+                      <td class="muted-cell">{{ claim.createdAt | date: 'MMM d, y' }}</td>
+                      <td class="amount-cell">{{ claim.claimAmount | currency: 'USD' }}</td>
+                      <td><span class="status-badge" [class]="'status-badge status-' + claim.status.toLowerCase()">{{ claim.status }}</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span>Showing all {{ claims().length }} claims</span>
+              <span class="refresh-hint"><span class="tiny-pulse"></span> Updates every 5 seconds</span>
+            </div>
+          }
+        </section>
+      </div>
+    }
+
+    @if (role() === 'Claims Staff') {
+      <section class="view-heading">
+        <div>
+          <div class="section-kicker">TEAM WORKSPACE</div>
+          <h2>Claims queue</h2>
+        </div>
+        <div class="queue-count"><strong>{{ assignedToMeCount() }}</strong> assigned to me</div>
+      </section>
+
+      <section class="surface staff-toolbar">
+        <div class="staff-toolbar-copy">
+          <span class="staff-avatar">✦</span>
+          <div>
+            <strong>Working as claims staff</strong>
+            <span>Choose an officer to manage their queue.</span>
+          </div>
+        </div>
+        <label class="field staff-select-field">
+          <span>Staff officer</span>
+          <select
+            [ngModel]="selectedStaffId()"
+            (ngModelChange)="selectedStaffId.set(+$event)"
+            [ngModelOptions]="{ standalone: true }"
+            [disabled]="lookupsLoading()"
+          >
+            @for (officer of staff(); track officer.id) {
+              <option [ngValue]="officer.id">{{ officer.fullName }} · {{ officer.specialization }}</option>
+            }
+          </select>
+        </label>
+      </section>
+
+      <section class="surface worklist-card">
+        <div class="list-heading">
+          <div>
+            <div class="section-kicker">ACTION REQUIRED</div>
+            <h3>All claims <span class="count-pill">{{ claims().length }}</span></h3>
+          </div>
+          <button type="button" class="button button-secondary refresh-button" (click)="refreshClaims()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 7v5h-5M4 17v-5h5" />
+              <path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        @if (claimsLoading() && claims().length === 0) {
+          <div class="loading-state"><span class="spinner"></span> Loading claims…</div>
+        } @else if (claims().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">✓</span>
+            <strong>Queue is clear</strong>
+            <p>New claims will show up here as they arrive.</p>
+          </div>
+        } @else {
+          <div class="staff-claim-list">
+            @for (claim of claims(); track claim.id) {
+              <article class="staff-claim">
+                <div class="staff-claim-main">
+                  <div class="staff-claim-topline">
+                    <span class="claim-reference">Claim #{{ claim.id }}</span>
+                    <span class="status-badge" [class]="'status-badge status-' + claim.status.toLowerCase()">{{ claim.status }}</span>
+                  </div>
+                  <h3>{{ claim.claimType }} claim <span>·</span> {{ claim.claimAmount | currency: 'USD' }}</h3>
+                  <p class="staff-claim-description">{{ claim.description }}</p>
+                  <div class="staff-claim-meta">
+                    <span><span class="meta-icon">◉</span> {{ claim.claimant.fullName }}</span>
+                    <span><span class="meta-icon">▦</span> {{ claim.claimant.policyNumber }}</span>
+                    <span><span class="meta-icon">◷</span> {{ claim.createdAt | date: 'MMM d, y' }}</span>
+                  </div>
+                </div>
+
+                <div class="staff-claim-action">
+                  @if (claim.status === 'Submitted') {
+                    <button
+                      type="button"
+                      class="button button-primary"
+                      [disabled]="selectedStaffId() === null || processingClaimId() === claim.id"
+                      (click)="assignToMe(claim)"
+                    >
+                      @if (processingClaimId() === claim.id) {
+                        <span class="spinner spinner-light"></span> Assigning…
+                      } @else {
+                        Assign to me <span class="button-arrow">→</span>
+                      }
+                    </button>
+                  } @else if (claim.status === 'Assigned' && claim.assignedStaffId === selectedStaffId()) {
+                    <label class="field decision-field">
+                      <span>Decision notes <em>Required</em></span>
+                      <input
+                        type="text"
+                        [name]="'decisionNotes-' + claim.id"
+                        [(ngModel)]="decisionNotes[claim.id]"
+                        [ngModelOptions]="{ standalone: true }"
+                        placeholder="Add a short explanation"
+                        required
+                      />
+                    </label>
+                    <div class="decision-actions">
+                      <button
+                        type="button"
+                        class="button button-approve"
+                        [disabled]="isDecisionDisabled(claim)"
+                        (click)="decide(claim, true)"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        class="button button-reject"
+                        [disabled]="isDecisionDisabled(claim)"
+                        (click)="decide(claim, false)"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  } @else if (claim.status === 'Assigned') {
+                    <div class="assigned-owner">
+                      <span class="assigned-owner-label">Assigned to</span>
+                      <strong>{{ claim.assignedStaff?.fullName ?? 'Unassigned' }}</strong>
+                    </div>
+                  } @else {
+                    <span class="completed-label">No action needed</span>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+          <div class="table-footer">
+            <span>Showing all {{ claims().length }} claims</span>
+            <span class="refresh-hint"><span class="tiny-pulse"></span> Updates every 5 seconds</span>
+          </div>
+        }
+      </section>
+    }
+
+    @if (role() === 'Manager') {
+      <section class="view-heading manager-heading">
+        <div>
+          <div class="section-kicker">PORTFOLIO HEALTH</div>
+          <h2>Manager overview</h2>
+        </div>
+        <button
+          type="button"
+          class="button button-secondary refresh-button"
+          [disabled]="metricsRefreshing()"
+          (click)="refreshMetrics()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 7v5h-5M4 17v-5h5" />
+            <path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2" />
+          </svg>
+          {{ metricsRefreshing() ? 'Refreshing…' : 'Refresh metrics' }}
+        </button>
+      </section>
+
+      <section class="metrics-grid" aria-label="Manager metrics">
+        <article class="metric-card metric-pending">
+          <div class="metric-top">
+            <span class="metric-icon">◷</span>
+            <span class="metric-trend">CURRENT EXPOSURE</span>
+          </div>
+          <p>Pending exposure</p>
+          <strong>{{ metrics() ? (metrics()!.pendingExposureAmount | currency: 'USD': 'symbol': '1.0-2') : '—' }}</strong>
+          <span class="metric-footnote">Submitted and assigned claims</span>
+        </article>
+        <article class="metric-card metric-approved">
+          <div class="metric-top">
+            <span class="metric-icon">✓</span>
+            <span class="metric-trend">APPROVED</span>
+          </div>
+          <p>Approved liability</p>
+          <strong>{{ metrics() ? (metrics()!.approvedLiabilityAmount | currency: 'USD': 'symbol': '1.0-2') : '—' }}</strong>
+          <span class="metric-footnote">Total approved claim value</span>
+        </article>
+        <article class="metric-card metric-open">
+          <div class="metric-top">
+            <span class="metric-icon">⌁</span>
+            <span class="metric-trend">IN PROGRESS</span>
+          </div>
+          <p>Open claims</p>
+          <strong>{{ metrics() ? (metrics()!.openClaimsCount | number) : '—' }}</strong>
+          <span class="metric-footnote">Awaiting a final decision</span>
+        </article>
+        <article class="metric-card metric-total">
+          <div class="metric-top">
+            <span class="metric-icon">▤</span>
+            <span class="metric-trend">ALL TIME</span>
+          </div>
+          <p>Total claims</p>
+          <strong>{{ metrics() ? (metrics()!.totalClaimsCount | number) : '—' }}</strong>
+          <span class="metric-footnote">Across the full portfolio</span>
+        </article>
+      </section>
+
+      <div class="metrics-meta">
+        <span><span class="tiny-pulse"></span> Auto-refreshes every 5 seconds</span>
+        @if (metrics()?.lastUpdatedAt; as lastUpdatedAt) {
+          <span>Last updated {{ lastUpdatedAt | date: 'h:mm:ss a' }}</span>
+        }
+      </div>
+
+      <section class="surface manager-claims-card">
+        <div class="list-heading">
+          <div>
+            <div class="section-kicker">PORTFOLIO</div>
+            <h3>All claims <span class="count-pill">{{ claims().length }}</span></h3>
+          </div>
+          <span class="read-only-label"><span>◉</span> Read only</span>
+        </div>
+
+        @if (claimsLoading() && claims().length === 0) {
+          <div class="loading-state"><span class="spinner"></span> Loading claims…</div>
+        } @else if (claims().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">▤</span>
+            <strong>No claims to display</strong>
+            <p>Claims will appear here once they’re submitted.</p>
+          </div>
+        } @else {
+          <div class="table-wrap">
+            <table class="manager-table">
+              <thead>
+                <tr>
+                  <th>Claim</th>
+                  <th>Claimant</th>
+                  <th>Type</th>
+                  <th>Assigned staff</th>
+                  <th>Created</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (claim of claims(); track claim.id) {
+                  <tr>
+                    <td><span class="claim-reference">#{{ claim.id }}</span></td>
+                    <td>
+                      <span class="claim-owner">{{ claim.claimant.fullName }}</span>
+                      <span class="cell-subtext">{{ claim.claimant.policyNumber }}</span>
+                    </td>
+                    <td>{{ claim.claimType }}</td>
+                    <td>{{ claim.assignedStaff?.fullName ?? '—' }}</td>
+                    <td class="muted-cell">{{ claim.createdAt | date: 'MMM d, y' }}</td>
+                    <td class="amount-cell">{{ claim.claimAmount | currency: 'USD' }}</td>
+                    <td><span class="status-badge" [class]="'status-badge status-' + claim.status.toLowerCase()">{{ claim.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span>Showing all {{ claims().length }} claims</span>
+            <span class="refresh-hint">Read-only portfolio view</span>
+          </div>
+        }
+      </section>
+    }
+
+    <footer class="page-footer">
+      <span>Claimwise <span class="footer-dot">·</span> Claims operations workspace</span>
+      <span>Need help? <a href="mailto:claims@example.com">Contact support</a></span>
+    </footer>
+  </main>
+</div>
