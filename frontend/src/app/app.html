@@ -310,7 +310,14 @@
                     <span class="claim-reference">Claim #{{ claim.id }}</span>
                     <span class="status-badge" [class]="'status-badge status-' + claim.status.toLowerCase()">{{ claim.status }}</span>
                   </div>
-                  <h3>{{ claim.claimType }} claim <span>·</span> {{ claim.claimAmount | currency: 'USD' }}</h3>
+                  <h3 class="staff-claim-title">
+                    <span>{{ claim.claimType }} claim</span>
+                    @if (isRecommendedMatch(claim)) {
+                      <span class="recommended-match">Recommended Match</span>
+                    }
+                    <span class="claim-title-divider">·</span>
+                    <span>{{ claim.claimAmount | currency: 'USD' }}</span>
+                  </h3>
                   <p class="staff-claim-description">{{ claim.description }}</p>
                   <div class="staff-claim-meta">
                     <span><span class="meta-icon">◉</span> {{ claim.claimant.fullName }}</span>

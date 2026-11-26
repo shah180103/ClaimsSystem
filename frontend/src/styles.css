@@ -981,7 +981,11 @@ tbody tr:hover {
   font-size: 10px;
 }
 
-.staff-claim h3 {
+.staff-claim-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
   margin: 11px 0 6px;
   color: #364940;
   font-size: 13px;
@@ -989,9 +993,22 @@ tbody tr:hover {
   letter-spacing: -0.2px;
 }
 
-.staff-claim h3 > span {
+.claim-title-divider {
   color: #9ba69f;
   font-weight: 400;
+}
+
+.recommended-match {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border: 1px solid #dce9f5;
+  border-radius: 20px;
+  color: #557da7;
+  background: #f0f6fc;
+  font: 600 8px/1 'DM Sans', sans-serif;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .staff-claim-description {

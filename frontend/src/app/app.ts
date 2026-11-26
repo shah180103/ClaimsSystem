@@ -200,6 +200,17 @@ export class App implements OnInit {
     );
   }
 
+  isRecommendedMatch(claim: Pick<Claim, 'claimType'>): boolean {
+    const selectedStaff = this.staff().find(
+      (officer) => officer.id === this.selectedStaffId(),
+    );
+
+    return (
+      selectedStaff?.specialization.trim().toLowerCase() ===
+      claim.claimType.trim().toLowerCase()
+    );
+  }
+
   private loadLookups(): void {
     this.api.getLookups().pipe(
       finalize(() => this.lookupsLoading.set(false)),

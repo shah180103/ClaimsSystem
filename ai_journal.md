@@ -19,3 +19,8 @@
 - **Asked AI:** To write a clear, easy-to-read `README.md` explaining the system design, 4-table database, local setup steps, and 3-hour trade-offs.
 - **Accepted:** Documented the exact startup commands for Docker, .NET, and Angular alongside a plain-English explanation of the sync vs. async Kafka flow.
 - **Overrode:** Deleted the default `frontend/README.md` Angular template file so to avoid confusion.
+
+### Staff Specialization Indicator 
+- **Asked AI:** To add a "Recommended Match" badge in the Claims Staff view when a claim's type matches the selected staff member's specialization.
+- **Accepted:** Added a blue visual badge next to matching claim types to guide staff toward their specialty area.
+- **Overrode:** Kept the "Assign to Me" button enabled for all submitted claims instead of blocking cross-type assignments, allowing staff to help clear backlog spikes in other categories.
