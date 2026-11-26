@@ -68,8 +68,8 @@ Open http://localhost:4200 in your browser.
 
 To deliver a reliable, working end-to-end system within the time limit:
 
-- Included: Full claim state validation, normalized relational schema, real Kafka producer/consumer event flow, idempotent manager exposure math, and a working 3-role UI.
+- **Included:** Full claim state validation, normalized relational schema, real Kafka producer/consumer event flow, idempotent manager exposure math, and a working 3-role UI.
 
-- Intentionally Deferred: User login/JWT authentication (replaced with pre-seeded dropdowns), file uploads for receipts, and cloud deployment.
+* **Intentionally Deferred:** User login/JWT authentication (replaced with pre-seeded dropdowns), interactive staff-to-claimant info requests (`InfoRequested`), file uploads for receipts, and cloud deployment.
 
-- Next Steps for Production: Add role-based authentication, implement the Transactional Outbox pattern so database writes and Kafka events never go out of sync, and add automated xUnit integration tests.
+* **Next Steps for Production:** Add role-based authentication, add an `InfoRequested` status with a `ClaimComments` table so staff can request missing details from claimants, implement the Transactional Outbox pattern so database writes and Kafka events never go out of sync, and add automated xUnit integration tests.

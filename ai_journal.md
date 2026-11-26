@@ -35,3 +35,8 @@
 - **Accepted:** Tracked previous claim statuses across Angular's 5-second refresh cycles and displayed a dismissible banner at the top of the Claimant page upon status transition.
 - **Overrode:** Handled status change detection directly in the frontend using the existing polling loop instead of adding SignalR websockets or email/Kafka notification workers, avoiding extra backend infrastructure while still giving instant user feedback.
 
+### Final Scope & State Machine Decision 
+- **Asked AI:** How to handle the staff-to-claimant additional information request requirement cleanly within the remaining time limit.
+- **Accepted:** Documented the `InfoRequested` status and `ClaimComments` table in `README.md` under deferred scope and production next steps.
+- **Overrode:** Rejected adding a frontend-only `localStorage` workaround so that 100% of claim states remain backed by real SQLite persistence and backend validation guards rather than unpersisted browser state.
+
