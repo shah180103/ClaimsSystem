@@ -1047,6 +1047,40 @@ tbody tr:hover {
   font-size: 10px;
 }
 
+.staff-filter-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 20px;
+  overflow-x: auto;
+  border-top: 1px solid #edf0ed;
+  background: #fafbfa;
+}
+
+.staff-filter-tab {
+  min-height: 31px;
+  padding: 0 12px;
+  color: #78857d;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.staff-filter-tab:hover {
+  color: #3e6e56;
+  background: #f0f5f1;
+}
+
+.staff-filter-tab.active {
+  color: #2d7356;
+  border-color: #deebe1;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(37, 68, 51, 0.06);
+}
+
 .staff-claim-list {
   border-top: 1px solid #edf0ed;
 }

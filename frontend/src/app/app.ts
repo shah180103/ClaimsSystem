@@ -31,6 +31,8 @@ interface ClaimStatusNotification {
   decisionNotes: string | null;
 }
 
+type StaffQueueFilter = 'Actionable' | 'Available' | 'My Queue' | 'All';
+
 @Component({
   imports: [CurrencyPipe, DatePipe, DecimalPipe, FormsModule],
   selector: 'app-root',
@@ -42,6 +44,12 @@ export class App implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly roles: UserRole[] = ['Claimant', 'Claims Staff', 'Manager'];
+  readonly staffQueueFilters: StaffQueueFilter[] = [
+    'Actionable',
+    'Available',
+    'My Queue',
+    'All',
+  ];
   readonly claimTypes = ['Auto', 'Property', 'Health', 'Other'];
   readonly today = new Date();
   readonly role = signal<UserRole>('Claimant');
@@ -52,6 +60,7 @@ export class App implements OnInit {
   readonly metrics = signal<ManagerMetrics | null>(null);
   readonly selectedClaimantId = signal<number | null>(null);
   readonly selectedStaffId = signal<number | null>(null);
+  readonly staffQueueFilter = signal<StaffQueueFilter>('Actionable');
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
   readonly claimsLoading = signal(true);
@@ -76,6 +85,29 @@ export class App implements OnInit {
       : this.claims().filter(
           (claim) => Number(claim.claimantId) === Number(claimantId),
         );
+  });
+  readonly staffClaims = computed(() => {
+    const staffId = this.selectedStaffId();
+    const filter = this.staffQueueFilter();
+
+    return this.claims().filter((claim) => {
+      const assignedToMe =
+        staffId !== null &&
+        claim.assignedStaffId !== null &&
+        Number(claim.assignedStaffId) === Number(staffId);
+      const inMyQueue = claim.status === 'Assigned' && assignedToMe;
+
+      switch (filter) {
+        case 'Actionable':
+          return claim.status === 'Submitted' || assignedToMe;
+        case 'Available':
+          return claim.status === 'Submitted';
+        case 'My Queue':
+          return inMyQueue;
+        case 'All':
+          return true;
+      }
+    });
   });
   readonly visibleClaimNotifications = computed(() => {
     const claimantId = this.selectedClaimantId();

@@ -5,6 +5,39 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { Claim } from './claims.models';
+
+function makeClaim(
+  id: number,
+  status: Claim['status'],
+  assignedStaffId: number | null,
+): Claim {
+  return {
+    id,
+    claimantId: 2,
+    assignedStaffId,
+    claimType: 'Property',
+    description: 'Test claim',
+    claimAmount: 500,
+    status,
+    decisionNotes: null,
+    createdAt: '2026-11-25T12:00:00Z',
+    claimant: {
+      id: 2,
+      fullName: 'Jordan Taylor',
+      policyNumber: 'POL-1002',
+      email: 'jordan@example.com',
+    },
+    assignedStaff:
+      assignedStaffId === null
+        ? null
+        : {
+            id: assignedStaffId,
+            fullName: 'Staff member',
+            specialization: 'Property',
+          },
+  };
+}
 
 describe('App', () => {
   let httpTesting: HttpTestingController;
@@ -97,9 +130,47 @@ describe('App', () => {
     expect(claimantRows()).toHaveLength(1);
     expect(claimantRows()[0].textContent).toContain('#8');
 
+    fixture.componentInstance.claims.update((claims) => [
+      ...claims,
+      makeClaim(9, 'Assigned', 2),
+      makeClaim(10, 'Assigned', 3),
+      makeClaim(11, 'Approved', 2),
+    ]);
     fixture.componentInstance.setRole('Claims Staff');
     fixture.detectChanges();
 
+    expect(fixture.componentInstance.staffQueueFilter()).toBe('Actionable');
+    expect(element.querySelectorAll('.staff-claim')).toHaveLength(4);
+    const filterTabs = Array.from(
+      element.querySelectorAll<HTMLButtonElement>('.staff-filter-tab'),
+    );
+    expect(filterTabs.map((tab) => tab.textContent?.trim())).toEqual([
+      'Actionable',
+      'Available',
+      'My Queue',
+      'All',
+    ]);
+
+    filterTabs[1].click();
+    fixture.detectChanges();
+    expect(element.querySelectorAll('.staff-claim')).toHaveLength(2);
+
+    filterTabs[2].click();
+    fixture.detectChanges();
+    expect(element.querySelectorAll('.staff-claim')).toHaveLength(1);
+    expect(element.querySelector('.staff-claim')?.textContent).toContain('#9');
+
+    fixture.componentInstance.selectedStaffId.set(3);
+    fixture.detectChanges();
+    expect(element.querySelector('.staff-claim')?.textContent).toContain('#10');
+
+    fixture.componentInstance.selectedStaffId.set(2);
+    filterTabs[3].click();
+    fixture.detectChanges();
+    expect(element.querySelectorAll('.staff-claim')).toHaveLength(5);
+
+    filterTabs[0].click();
+    fixture.detectChanges();
     expect(element.querySelectorAll('.recommended-match')).toHaveLength(1);
     expect(element.querySelector('.recommended-match')?.textContent?.trim()).toBe(
       'Recommended Match',

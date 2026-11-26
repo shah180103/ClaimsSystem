@@ -318,7 +318,7 @@
         <div class="list-heading">
           <div>
             <div class="section-kicker">ACTION REQUIRED</div>
-            <h3>All claims <span class="count-pill">{{ claims().length }}</span></h3>
+            <h3>Claims <span class="count-pill">{{ staffClaims().length }}</span></h3>
           </div>
           <button type="button" class="button button-secondary refresh-button" (click)="refreshClaims()">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -329,17 +329,32 @@
           </button>
         </div>
 
+        <nav class="staff-filter-tabs" role="tablist" aria-label="Filter claims">
+          @for (filter of staffQueueFilters; track filter) {
+            <button
+              type="button"
+              class="staff-filter-tab"
+              [class.active]="staffQueueFilter() === filter"
+              [attr.aria-selected]="staffQueueFilter() === filter"
+              role="tab"
+              (click)="staffQueueFilter.set(filter)"
+            >
+              {{ filter }}
+            </button>
+          }
+        </nav>
+
         @if (claimsLoading() && claims().length === 0) {
           <div class="loading-state"><span class="spinner"></span> Loading claims…</div>
-        } @else if (claims().length === 0) {
+        } @else if (staffClaims().length === 0) {
           <div class="empty-state">
             <span class="empty-icon">✓</span>
-            <strong>Queue is clear</strong>
-            <p>New claims will show up here as they arrive.</p>
+            <strong>No claims match this filter</strong>
+            <p>Try another filter or check back when new claims arrive.</p>
           </div>
         } @else {
           <div class="staff-claim-list">
-            @for (claim of claims(); track claim.id) {
+            @for (claim of staffClaims(); track claim.id) {
               <article class="staff-claim">
                 <div class="staff-claim-main">
                   <div class="staff-claim-topline">
@@ -419,7 +434,7 @@
             }
           </div>
           <div class="table-footer">
-            <span>Showing all {{ claims().length }} claims</span>
+            <span>Showing {{ staffClaims().length }} claims</span>
             <span class="refresh-hint"><span class="tiny-pulse"></span> Updates every 5 seconds</span>
           </div>
         }

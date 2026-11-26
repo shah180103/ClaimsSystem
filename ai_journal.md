@@ -40,3 +40,7 @@
 - **Accepted:** Documented the `InfoRequested` status and `ClaimComments` table in `README.md` under deferred scope and production next steps.
 - **Overrode:** Rejected adding a frontend-only `localStorage` workaround so that 100% of claim states remain backed by real SQLite persistence and backend validation guards rather than unpersisted browser state.
 
+### Claims Staff Queue Filtering 
+- **Asked AI:** To add filter tabs in the Claims Staff view so adjusters can quickly isolate unassigned tasks and their own active claims without scrolling past closed records or other staff members' queues.
+- **Accepted:** Added four frontend filter tabs (`Actionable`, `Available`, `My Queue`, and `All`) above the staff table, defaulting to `Actionable` so unassigned `Submitted` claims and the selected officer's `Assigned` claims appear immediately.
+- **Overrode:** Implemented the queue filters directly in the Angular component over the already-loaded claims list instead of adding new query parameters or endpoints on the .NET API, keeping the backend API surface clean and avoiding extra HTTP requests.
