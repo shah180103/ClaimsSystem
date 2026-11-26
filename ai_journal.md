@@ -14,3 +14,8 @@
 - **Asked AI:** To create a single-page Angular UI with a role switcher for Claimant, Claims Staff, and Manager views connected to the .NET API.
 - **Accepted:** Built one clean component with dropdowns for seeded claimants/staff, action buttons for claim transitions, and auto-refreshing manager summary cards.
 - **Overrode:** Kept all three views in a single page with a role toggle instead of adding complex routing or login screens, ensuring the full workflow works smoothly within the time limit and easier testing process.
+
+### Project documentation in readme.md
+- **Asked AI:** To write a clear, easy-to-read `README.md` explaining the system design, 4-table database, local setup steps, and 3-hour trade-offs.
+- **Accepted:** Documented the exact startup commands for Docker, .NET, and Angular alongside a plain-English explanation of the sync vs. async Kafka flow.
+- **Overrode:** Deleted the default `frontend/README.md` Angular template file so to avoid confusion.
