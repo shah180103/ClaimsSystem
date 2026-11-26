@@ -1,0 +1,19 @@
+# .NET build outputs
+bin/
+obj/
+
+# Node & Angular build outputs
+node_modules/
+.angular/
+dist/
+
+# Local SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# IDE & OS clutter
+.vs/
+.vscode/
+.DS_Store
+Thumbs.db
