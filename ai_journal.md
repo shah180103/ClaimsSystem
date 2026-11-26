@@ -24,3 +24,8 @@
 - **Asked AI:** To add a "Recommended Match" badge in the Claims Staff view when a claim's type matches the selected staff member's specialization.
 - **Accepted:** Added a blue visual badge next to matching claim types to guide staff toward their specialty area.
 - **Overrode:** Kept the "Assign to Me" button enabled for all submitted claims instead of blocking cross-type assignments, allowing staff to help clear backlog spikes in other categories.
+
+### Claimant View Filtering (Claims History)
+- **Asked AI:** To filter the Claimant view's claim history table so it only displays claims belonging to the currently selected policyholder.
+- **Accepted:** Filtered the list on the frontend by matching `claimantId` to the dropdown selection, keeping full cross-company visibility intact for Claims Staff and Managers.
+- **Overrode:** Kept the filtering in the frontend instead of creating a new backend endpoint (`GET /api/claims/claimant/{id}`), avoiding extra API routes and duplicate 5-second polling calls since the app already loads the active claims list.

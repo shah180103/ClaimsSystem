@@ -59,6 +59,14 @@ export class App implements OnInit {
             claim.status === 'Assigned' && claim.assignedStaffId === staffId,
         ).length;
   });
+  readonly claimantClaims = computed(() => {
+    const claimantId = this.selectedClaimantId();
+    return claimantId === null
+      ? []
+      : this.claims().filter(
+          (claim) => Number(claim.claimantId) === Number(claimantId),
+        );
+  });
 
   draft: CreateClaimRequest = {
     claimantId: 0,

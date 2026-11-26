@@ -31,6 +31,12 @@ describe('App', () => {
           policyNumber: 'POL-1001',
           email: 'avery@example.com',
         },
+        {
+          id: 2,
+          fullName: 'Jordan Taylor',
+          policyNumber: 'POL-1002',
+          email: 'jordan@example.com',
+        },
       ],
       staff: [
         {
@@ -61,7 +67,7 @@ describe('App', () => {
       },
       {
         id: 8,
-        claimantId: 1,
+        claimantId: '2',
         assignedStaffId: null,
         claimType: 'Auto',
         description: 'Vehicle damage',
@@ -70,19 +76,30 @@ describe('App', () => {
         decisionNotes: null,
         createdAt: '2026-11-25T11:00:00Z',
         claimant: {
-          id: 1,
-          fullName: 'Avery Morgan',
-          policyNumber: 'POL-1001',
-          email: 'avery@example.com',
+          id: 2,
+          fullName: 'Jordan Taylor',
+          policyNumber: 'POL-1002',
+          email: 'jordan@example.com',
         },
         assignedStaff: null,
       },
     ]);
 
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const claimantRows = () =>
+      Array.from(element.querySelectorAll('.claims-card tbody tr'));
+    expect(claimantRows()).toHaveLength(1);
+    expect(claimantRows()[0].textContent).toContain('#7');
+
+    fixture.componentInstance.selectedClaimantId.set(2);
+    fixture.detectChanges();
+    expect(claimantRows()).toHaveLength(1);
+    expect(claimantRows()[0].textContent).toContain('#8');
+
     fixture.componentInstance.setRole('Claims Staff');
     fixture.detectChanges();
 
-    const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelectorAll('.recommended-match')).toHaveLength(1);
     expect(element.querySelector('.recommended-match')?.textContent?.trim()).toBe(
       'Recommended Match',
